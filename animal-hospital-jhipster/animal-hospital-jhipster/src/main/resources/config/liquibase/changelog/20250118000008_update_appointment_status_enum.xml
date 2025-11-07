@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250118000008_update_appointment_status_enum" author="jhipster">
+        <!-- Add new status values to existing appointment table -->
+        <sql>
+            ALTER TABLE appointment 
+            MODIFY COLUMN status VARCHAR(50) NOT NULL 
+            COMMENT 'Appointment status: PENDING, APPROVED, REJECTED, SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, RESCHEDULED';
+        </sql>
+    </changeSet>
+
+    <changeSet id="20250118000009_add_appointment_indexes" author="jhipster">
+        <!-- Add indexes for better performance -->
+        <createIndex tableName="appointment_action" indexName="idx_appointment_action_appointment_id">
+            <column name="appointment_id"/>
+        </createIndex>
+        
+        <createIndex tableName="appointment_action" indexName="idx_appointment_action_assigned_to_id">
+            <column name="assigned_to_id"/>
+        </createIndex>
+        
+        <createIndex tableName="appointment_action" indexName="idx_appointment_action_created_by_id">
+            <column name="created_by_id"/>
+        </createIndex>
+        
+        <createIndex tableName="appointment_action" indexName="idx_appointment_action_status">
+            <column name="status"/>
+        </createIndex>
+        
+        <createIndex tableName="appointment_action" indexName="idx_appointment_action_action_type">
+            <column name="action_type"/>
+        </createIndex>
+        
+        <createIndex tableName="lab_test" indexName="idx_lab_test_appointment_id">
+            <column name="appointment_id"/>
+        </createIndex>
+        
+        <createIndex tableName="lab_test" indexName="idx_lab_test_pet_id">
+            <column name="pet_id"/>
+        </createIndex>
+        
+        <createIndex tableName="lab_test" indexName="idx_lab_test_requested_by_id">
+            <column name="requested_by_id"/>
+        </createIndex>
+        
+        <createIndex tableName="lab_test" indexName="idx_lab_test_assigned_to_id">
+            <column name="assigned_to_id"/>
+        </createIndex>
+        
+        <createIndex tableName="lab_test" indexName="idx_lab_test_status">
+            <column name="status"/>
+        </createIndex>
+        
+        <createIndex tableName="lab_test" indexName="idx_lab_test_test_type">
+            <column name="test_type"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
+
+
+

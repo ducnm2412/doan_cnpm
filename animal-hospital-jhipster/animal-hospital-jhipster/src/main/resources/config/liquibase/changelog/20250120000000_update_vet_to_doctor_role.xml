@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!--
+        Update ROLE_VET to ROLE_DOCTOR and ensure ROLE_ASSISTANT exists
+    -->
+    <changeSet id="20250120000000-1" author="jhipster">
+        <comment>Update ROLE_VET to ROLE_DOCTOR in jhi_user_authority table</comment>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="jhi_user_authority"/>
+        </preConditions>
+        <sql>
+            UPDATE jhi_user_authority 
+            SET authority_name = 'ROLE_DOCTOR' 
+            WHERE authority_name = 'ROLE_VET';
+        </sql>
+    </changeSet>
+
+    <changeSet id="20250120000000-2" author="jhipster">
+        <comment>Update ROLE_VET to ROLE_DOCTOR in jhi_authority table</comment>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="jhi_authority"/>
+        </preConditions>
+        <sql>
+            UPDATE jhi_authority 
+            SET name = 'ROLE_DOCTOR' 
+            WHERE name = 'ROLE_VET';
+        </sql>
+    </changeSet>
+
+    <changeSet id="20250120000000-3" author="jhipster">
+        <comment>Insert ROLE_ASSISTANT if it doesn't exist</comment>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="jhi_authority"/>
+            <not>
+                <rowCount tableName="jhi_authority" where="name='ROLE_ASSISTANT'"/>
+            </not>
+        </preConditions>
+        <insert tableName="jhi_authority">
+            <column name="name" value="ROLE_ASSISTANT"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="20250120000000-4" author="jhipster">
+        <comment>Insert ROLE_DOCTOR if it doesn't exist (in case it was never created)</comment>
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="jhi_authority"/>
+            <not>
+                <rowCount tableName="jhi_authority" where="name='ROLE_DOCTOR'"/>
+            </not>
+        </preConditions>
+        <insert tableName="jhi_authority">
+            <column name="name" value="ROLE_DOCTOR"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
+

@@ -1,0 +1,11 @@
+entity Appointment {
+  timeStart ZonedDateTime required
+  timeEnd ZonedDateTime required
+  type String required
+  status String required
+  notes String
+}
+
+dto Appointment with mapstruct
+service Appointment with serviceClass
+paginate Appointment with pagination

@@ -1,0 +1,13 @@
+
+.footer {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 70px;
+  background-color: white; /* Màu nền đen xám */
+  color: #facc15;           /* Màu chữ vàng nhạt */
+  text-align: center;
+  padding: 20px 0;
+  font-size: 16px;
+  font-weight: 500;
+  width: 100vw;
+  border-top: 2px solid #ff914d;
+}

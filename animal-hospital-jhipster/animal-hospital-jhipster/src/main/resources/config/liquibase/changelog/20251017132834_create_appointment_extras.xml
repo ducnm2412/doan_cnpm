@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Create table; if it already exists, mark as ran to avoid failure -->
+    <changeSet id="create-appointment-assistant" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_assistant"/>
+            </not>
+        </preConditions>
+        <createTable tableName="appointment_assistant">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime(6)"/>
+            <column name="appointment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assistant_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Add constraints for appointment_assistant (run idempotently) -->
+    <changeSet id="create-appointment-assistant-constraints" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment_assistant"/>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="appointment_assistant" baseColumnNames="appointment_id"
+                                 referencedTableName="appointment" referencedColumnNames="id"
+                                 constraintName="fk_assistant_appointment"/>
+        <addForeignKeyConstraint baseTableName="appointment_assistant" baseColumnNames="assistant_id"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 constraintName="fk_assistant_user"/>
+        <addUniqueConstraint tableName="appointment_assistant" columnNames="appointment_id, assistant_id"
+                             constraintName="uk_assistant_appointment_user"/>
+    </changeSet>
+
+    <changeSet id="create-appointment-message" author="jhipster">
+        <createTable tableName="appointment_message">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message" type="varchar(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="appointment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sender_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="appointment_message" baseColumnNames="appointment_id"
+                                 referencedTableName="appointment" referencedColumnNames="id"
+                                 constraintName="fk_message_appointment"/>
+        <addForeignKeyConstraint baseTableName="appointment_message" baseColumnNames="sender_id"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 constraintName="fk_message_sender"/>
+        <createIndex indexName="idx_message_appointment" tableName="appointment_message">
+            <column name="appointment_id"/>
+        </createIndex>
+        <createIndex indexName="idx_message_sender" tableName="appointment_message">
+            <column name="sender_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="create-appointment-history" author="jhipster">
+        <createTable tableName="appointment_history">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="action" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="timestamp" type="datetime(6)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="details" type="varchar(2000)"/>
+            <column name="appointment_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="appointment_history" baseColumnNames="appointment_id"
+                                 referencedTableName="appointment" referencedColumnNames="id"
+                                 constraintName="fk_history_appointment"/>
+        <addForeignKeyConstraint baseTableName="appointment_history" baseColumnNames="user_id"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 constraintName="fk_history_user"/>
+        <createIndex indexName="idx_history_appointment" tableName="appointment_history">
+            <column name="appointment_id"/>
+        </createIndex>
+        <createIndex indexName="idx_history_user" tableName="appointment_history">
+            <column name="user_id"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

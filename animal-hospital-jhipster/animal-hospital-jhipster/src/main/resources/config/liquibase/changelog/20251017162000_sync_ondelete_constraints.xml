@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Điều chỉnh quy tắc ON DELETE để gần với docpet_BA -->
+    <changeSet id="sync-ondelete-constraints" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="owner"/>
+            <tableExists tableName="vet"/>
+            <tableExists tableName="appointment"/>
+            <tableExists tableName="appointment_assistant"/>
+            <tableExists tableName="appointment_message"/>
+            <tableExists tableName="appointment_history"/>
+        </preConditions>
+
+        <!-- owner.user_id -> jhi_user.id: khi xóa user, set null owner.user_id -->
+        <dropForeignKeyConstraint baseTableName="owner" constraintName="fk_owner__user_id"/>
+        <addForeignKeyConstraint baseTableName="owner" baseColumnNames="user_id"
+                                 constraintName="fk_owner__user_id"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+
+        <!-- vet.user_id -> jhi_user.id: khi xóa user, RESTRICT -->
+        <dropForeignKeyConstraint baseTableName="vet" constraintName="fk_vet__user_id"/>
+        <addForeignKeyConstraint baseTableName="vet" baseColumnNames="user_id"
+                                 constraintName="fk_vet__user_id"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 onDelete="RESTRICT"/>
+
+        <!-- appointment_assistant: khi xóa appointment => CASCADE; xóa user => RESTRICT -->
+        <dropForeignKeyConstraint baseTableName="appointment_assistant" constraintName="fk_assistant_appointment"/>
+        <addForeignKeyConstraint baseTableName="appointment_assistant" baseColumnNames="appointment_id"
+                                 constraintName="fk_assistant_appointment"
+                                 referencedTableName="appointment" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="appointment_assistant" constraintName="fk_assistant_user"/>
+        <addForeignKeyConstraint baseTableName="appointment_assistant" baseColumnNames="assistant_id"
+                                 constraintName="fk_assistant_user"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 onDelete="RESTRICT"/>
+
+        <!-- appointment_message: khi xóa appointment => CASCADE; xóa sender (user) => CASCADE -->
+        <dropForeignKeyConstraint baseTableName="appointment_message" constraintName="fk_message_appointment"/>
+        <addForeignKeyConstraint baseTableName="appointment_message" baseColumnNames="appointment_id"
+                                 constraintName="fk_message_appointment"
+                                 referencedTableName="appointment" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="appointment_message" constraintName="fk_message_sender"/>
+        <addForeignKeyConstraint baseTableName="appointment_message" baseColumnNames="sender_id"
+                                 constraintName="fk_message_sender"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <!-- appointment_history: khi xóa appointment => CASCADE; xóa user => SET NULL (lưu lịch sử) -->
+        <!-- cần cho phép NULL cho cột user_id trước khi đặt onDelete=SET NULL -->
+        <dropNotNullConstraint tableName="appointment_history" columnName="user_id" columnDataType="BIGINT"/>
+        <dropForeignKeyConstraint baseTableName="appointment_history" constraintName="fk_history_appointment"/>
+        <addForeignKeyConstraint baseTableName="appointment_history" baseColumnNames="appointment_id"
+                                 constraintName="fk_history_appointment"
+                                 referencedTableName="appointment" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <dropForeignKeyConstraint baseTableName="appointment_history" constraintName="fk_history_user"/>
+        <addForeignKeyConstraint baseTableName="appointment_history" baseColumnNames="user_id"
+                                 constraintName="fk_history_user"
+                                 referencedTableName="jhi_user" referencedColumnNames="id"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+

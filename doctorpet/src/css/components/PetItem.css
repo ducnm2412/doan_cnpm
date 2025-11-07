@@ -1,0 +1,66 @@
+.pet-item {
+  position: relative;
+  width: 240px;
+  height: fit-content;
+  border: 1px solid #ff914d ;
+  border-radius: 10px;
+  padding: 25px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  transition: 0.2s ease;
+}
+
+.pet-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(255, 145, 77, 0.3);
+}
+.pet-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+.pet-option {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  right: 0;
+  margin-top: 5px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+}
+.pet-option button {
+  background: #fff;
+  font-size: 8px;
+  padding: 10px 20px;
+  margin: 0;
+  border-radius: 0;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+  transform:none;
+}
+.pet-option button:hover {
+  background-color: #ccc;
+}
+.pet-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  margin-bottom: 25px;
+}
+
+.pet-info {
+  width: 100%;
+}
+
+.pet-field {
+  height: 32px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  padding: 5px;
+  border: 1px solid #ff914d ;
+}

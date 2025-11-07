@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- Add new columns to appointment table -->
+    <changeSet id="20250118000001-1" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="appointment" columnName="appointment_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="appointment">
+            <column name="appointment_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20250118000001-2" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="appointment" columnName="location_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="appointment">
+            <column name="location_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20250118000001-3" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="appointment" columnName="pet_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="appointment">
+            <column name="pet_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20250118000001-4" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="appointment" columnName="vet_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="appointment">
+            <column name="vet_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20250118000001-5" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="appointment" columnName="owner_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="appointment">
+            <column name="owner_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- Add foreign key constraints -->
+    <changeSet id="20250118000001-6" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="pet_id"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_appointment_pet"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="appointment" baseColumnNames="pet_id"
+                                 referencedTableName="pet" referencedColumnNames="id"
+                                 constraintName="fk_appointment_pet"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+    <changeSet id="20250118000001-7" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="vet_id"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_appointment_vet"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="appointment" baseColumnNames="vet_id"
+                                 referencedTableName="vet" referencedColumnNames="id"
+                                 constraintName="fk_appointment_vet"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+    <changeSet id="20250118000001-8" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="owner_id"/>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_appointment_owner"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseTableName="appointment" baseColumnNames="owner_id"
+                                 referencedTableName="owner" referencedColumnNames="id"
+                                 constraintName="fk_appointment_owner"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+    <!-- Add indexes for better performance -->
+    <changeSet id="20250118000001-9" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="pet_id"/>
+        </preConditions>
+        <createIndex indexName="idx_appointment_pet" tableName="appointment">
+            <column name="pet_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20250118000001-10" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="vet_id"/>
+        </preConditions>
+        <createIndex indexName="idx_appointment_vet" tableName="appointment">
+            <column name="vet_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20250118000001-11" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="owner_id"/>
+        </preConditions>
+        <createIndex indexName="idx_appointment_owner" tableName="appointment">
+            <column name="owner_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20250118000001-12" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="appointment_type"/>
+        </preConditions>
+        <createIndex indexName="idx_appointment_type" tableName="appointment">
+            <column name="appointment_type"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20250118000001-13" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="location_type"/>
+        </preConditions>
+        <createIndex indexName="idx_appointment_location" tableName="appointment">
+            <column name="location_type"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Update existing data with default values -->
+    <changeSet id="20250118000001-14" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="appointment_type"/>
+        </preConditions>
+        <update tableName="appointment">
+            <column name="appointment_type" value="NORMAL"/>
+            <where>appointment_type IS NULL</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="20250118000001-15" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+            <columnExists tableName="appointment" columnName="location_type"/>
+        </preConditions>
+        <update tableName="appointment">
+            <column name="location_type" value="AT_CLINIC"/>
+            <where>location_type IS NULL</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

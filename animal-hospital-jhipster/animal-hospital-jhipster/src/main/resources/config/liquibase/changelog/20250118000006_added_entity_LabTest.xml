@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250118000006_added_entity_LabTest" author="jhipster">
+        <createTable tableName="lab_test">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="test_name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="test_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(500)"/>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="result" type="text"/>
+            <column name="notes" type="text"/>
+            <column name="requested_date" type="${datetimeType}"/>
+            <column name="completed_date" type="${datetimeType}"/>
+            <column name="sample_collected_date" type="${datetimeType}"/>
+            <column name="appointment_id" type="bigint"/>
+            <column name="pet_id" type="bigint"/>
+            <column name="requested_by_id" type="bigint"/>
+            <column name="assigned_to_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20250118000007_added_entity_constraints_LabTest" author="jhipster">
+        <addForeignKeyConstraint baseColumnNames="appointment_id"
+                                 baseTableName="lab_test"
+                                 constraintName="fk_lab_test_appointment_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="appointment"/>
+
+        <addForeignKeyConstraint baseColumnNames="pet_id"
+                                 baseTableName="lab_test"
+                                 constraintName="fk_lab_test_pet_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="pet"/>
+
+        <addForeignKeyConstraint baseColumnNames="requested_by_id"
+                                 baseTableName="lab_test"
+                                 constraintName="fk_lab_test_requested_by_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
+
+        <addForeignKeyConstraint baseColumnNames="assigned_to_id"
+                                 baseTableName="lab_test"
+                                 constraintName="fk_lab_test_assigned_to_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+
+

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250118000003-1" author="jhipster">
+        <comment>Drop existing foreign key constraints if they exist to avoid duplicates</comment>
+        
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+        </preConditions>
+        
+        <!-- Drop existing foreign key constraints if they exist -->
+        <dropForeignKeyConstraint baseTableName="appointment" constraintName="fk_appointment_pet"/>
+    </changeSet>
+
+    <changeSet id="20250118000003-2" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+        </preConditions>
+        
+        <dropForeignKeyConstraint baseTableName="appointment" constraintName="fk_appointment_vet"/>
+    </changeSet>
+
+    <changeSet id="20250118000003-3" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment"/>
+        </preConditions>
+        
+        <dropForeignKeyConstraint baseTableName="appointment" constraintName="fk_appointment_owner"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+
+
+

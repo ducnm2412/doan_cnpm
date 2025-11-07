@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="floatType" value="float" dbms="mysql"/>
+    <property name="clobType" value="clob" dbms="mysql"/>
+    <property name="blobType" value="longblob" dbms="mysql"/>
+    <property name="uuidType" value="varchar(36)" dbms="mysql"/>
+    <property name="datetimeType" value="datetime(6)" dbms="mysql"/>
+    <property name="timeType" value="time(6)" dbms="mysql"/>
+
+    <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251017060947_added_entity_Owner.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251017060947_added_entity_constraints_Owner.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251017061127_added_entity_Pet.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251017061230_added_entity_Vet.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251017061230_added_entity_constraints_Vet.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251017061255_added_entity_Appointment.xml" relativeToChangelogFile="false"/>
+    <!-- extras will be applied after base entities created -->
+    <include file="config/liquibase/changelog/20251017132834_create_appointment_extras.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20251017161000_add_owner_profiles_view.xml" relativeToChangelogFile="false"/>
+           <include file="config/liquibase/changelog/20251017162000_sync_ondelete_constraints.xml" relativeToChangelogFile="false"/>
+           <!-- <include file="config/liquibase/changelog/20251017170500_apply_vet_triggers.xml" relativeToChangelogFile="false"/> -->
+    <!-- New entities for vet workflow -->
+    <include file="config/liquibase/changelog/20250118000004_added_entity_AppointmentAction.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250118000006_added_entity_LabTest.xml" relativeToChangelogFile="false"/>
+    <include file="config/liquibase/changelog/20250118000008_update_appointment_status_enum.xml" relativeToChangelogFile="false"/>
+    <!-- Update ROLE_VET to ROLE_DOCTOR and add ROLE_ASSISTANT -->
+    <include file="config/liquibase/changelog/20250120000000_update_vet_to_doctor_role.xml" relativeToChangelogFile="false"/>
+    <!-- jhipster-needle-liquibase-add-changelog - JHipster will add liquibase changelogs here -->
+    <!-- jhipster-needle-liquibase-add-constraints-changelog - JHipster will add liquibase constraints changelogs here -->
+    <!-- jhipster-needle-liquibase-add-incremental-changelog - JHipster will add incremental liquibase changelogs here -->
+</databaseChangeLog>

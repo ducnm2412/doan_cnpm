@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="20250118000004_added_entity_AppointmentAction" author="jhipster">
+        <createTable tableName="appointment_action">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="action_type" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(500)"/>
+            <column name="notes" type="text"/>
+            <column name="scheduled_time" type="${datetimeType}"/>
+            <column name="completed_time" type="${datetimeType}"/>
+            <column name="appointment_id" type="bigint"/>
+            <column name="assigned_to_id" type="bigint"/>
+            <column name="created_by_id" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20250118000005_added_entity_constraints_AppointmentAction" author="jhipster">
+        <addForeignKeyConstraint baseColumnNames="appointment_id"
+                                 baseTableName="appointment_action"
+                                 constraintName="fk_appointment_action_appointment_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="appointment"/>
+
+        <addForeignKeyConstraint baseColumnNames="assigned_to_id"
+                                 baseTableName="appointment_action"
+                                 constraintName="fk_appointment_action_assigned_to_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
+
+        <addForeignKeyConstraint baseColumnNames="created_by_id"
+                                 baseTableName="appointment_action"
+                                 constraintName="fk_appointment_action_created_by_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+
+

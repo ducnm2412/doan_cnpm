@@ -1,0 +1,12 @@
+entity AppointmentAssistant {
+  createdAt ZonedDateTime required
+}
+
+relationship ManyToOne {
+  AppointmentAssistant{appointment} to Appointment
+  AppointmentAssistant{assistant} to User with builtInEntity
+}
+
+dto AppointmentAssistant with mapstruct
+service AppointmentAssistant with serviceClass
+paginate AppointmentAssistant with pagination

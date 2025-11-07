@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="add-owner-profiles-view" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <viewExists viewName="owner_profiles"/>
+            </not>
+        </preConditions>
+        <sql splitStatements="false">
+            <![CDATA[
+            CREATE OR REPLACE VIEW owner_profiles AS
+            SELECT
+              o.id AS owner_id,
+              o.user_id,
+              CONCAT(COALESCE(u.first_name, ''), CASE WHEN u.first_name IS NOT NULL AND u.last_name IS NOT NULL THEN ' ' ELSE '' END, COALESCE(u.last_name, '')) AS full_name,
+              u.email,
+              o.phone AS phone,
+              o.address,
+              u.image_url AS avatar_url
+            FROM owner o
+            LEFT JOIN jhi_user u ON u.id = o.user_id;
+            ]]>
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>
+
+
+
+
+
+
+
+

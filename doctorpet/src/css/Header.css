@@ -1,0 +1,50 @@
+.header {
+  display: flex;
+  height: 70px;
+  width: 100vw;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff; /* màu nền header */
+  padding: 5px 150px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Logo */
+.img-header img {
+  height: 70px;
+  width: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.img-header img:hover {
+  transform: scale(1.05);
+}
+
+/* Nút đăng nhập / đăng ký */
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  margin-left: 10px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+.header-btn-register {
+  background-color: #28a745; /* màu xanh lá cho nút Đăng ký */
+}
+
+.header-btn-register:hover {
+  background-color: #1e7e34;
+}

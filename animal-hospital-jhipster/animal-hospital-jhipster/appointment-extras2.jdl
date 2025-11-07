@@ -1,0 +1,31 @@
+use Appointment
+
+entity AppointmentAssistant {
+  createdAt ZonedDateTime required
+}
+
+entity AppointmentMessage {
+  message String required,
+  timestamp ZonedDateTime required
+}
+
+entity AppointmentHistory {
+  action String required,
+  timestamp ZonedDateTime required,
+  details String
+}
+
+relationship ManyToOne {
+  AppointmentAssistant{appointment} to Appointment
+  AppointmentAssistant{assistant} to User with builtInEntity
+
+  AppointmentMessage{appointment} to Appointment
+  AppointmentMessage{sender} to User with builtInEntity
+
+  AppointmentHistory{appointment} to Appointment
+  AppointmentHistory{user} to User with builtInEntity
+}
+
+dto AppointmentAssistant, AppointmentMessage, AppointmentHistory with mapstruct
+service AppointmentAssistant, AppointmentMessage, AppointmentHistory with serviceClass
+paginate AppointmentAssistant, AppointmentMessage, AppointmentHistory with pagination

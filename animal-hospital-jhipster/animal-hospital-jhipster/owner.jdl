@@ -1,0 +1,13 @@
+entity Owner {
+  name String required
+  phone String required
+  address String required
+}
+
+relationship ManyToOne {
+  Owner{user} to User with builtInEntity
+}
+
+dto Owner with mapstruct
+service Owner with serviceClass
+paginate Owner with pagination

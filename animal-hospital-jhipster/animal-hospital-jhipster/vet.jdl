@@ -1,0 +1,12 @@
+entity Vet {
+  licenseNo String required
+  specialization String
+}
+
+relationship ManyToOne {
+  Vet{user} to User with builtInEntity
+}
+
+dto Vet with mapstruct
+service Vet with serviceClass
+paginate Vet with pagination

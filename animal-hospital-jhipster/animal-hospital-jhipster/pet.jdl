@@ -1,0 +1,15 @@
+entity Pet {
+  name String required
+  species String required
+  breed String
+  sex String
+  dateOfBirth LocalDate
+  weight BigDecimal
+  allergies String
+  notes String
+  imageUrl String
+}
+
+dto Pet with mapstruct
+service Pet with serviceClass
+paginate Pet with pagination

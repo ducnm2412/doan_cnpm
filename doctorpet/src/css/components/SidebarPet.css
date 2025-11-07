@@ -1,0 +1,62 @@
+.pet-sidebar {
+  position: absolute;
+  width: 100vw;
+  height: 150%;
+  background: rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  border: 10px;
+}
+.pet-form {
+  position: absolute;
+  top: 0;
+  right: 20%;
+  width: 400px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap:8px ;
+  background: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pet-form h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.pet-form .pet-form-label {
+    font-size: 8px;
+}
+.pet-form .pet-form-input,
+.pet-form .pet-form-select,
+.pet-form .pet-form-textarea {
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  outline: none;
+  font-size: 8px;
+}
+
+.pet-form textarea {
+  resize: vertical;
+}
+
+.pet-form button {
+  padding: 4px;
+  border: none;
+  background: #ff6a00;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.pet-form button:hover {
+  background: #e25800;
+}

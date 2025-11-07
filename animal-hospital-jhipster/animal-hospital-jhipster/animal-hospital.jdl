@@ -1,0 +1,88 @@
+// Animal Hospital Domain Model
+// Based on existing database schema
+
+entity Owner {
+  name String required
+  phone String required
+  address String required
+}
+
+entity Pet {
+  name String required
+  species String required
+  breed String
+  sex String
+  dateOfBirth LocalDate
+  weight BigDecimal
+  allergies String
+  notes String
+  imageUrl String
+}
+
+entity Vet {
+  licenseNo String required
+  specialization String
+}
+
+entity Appointment {
+  timeStart ZonedDateTime required
+  timeEnd ZonedDateTime required
+  type String required
+  status String required
+  notes String
+}
+
+entity AppointmentAssistant {
+  // Composite key entity
+}
+
+entity AppointmentMessage {
+  message String required
+  timestamp ZonedDateTime required
+}
+
+entity AppointmentHistory {
+  action String required
+  timestamp ZonedDateTime required
+  details String
+}
+
+entity PasswordResetToken {
+  token String required
+  expiryDate ZonedDateTime required
+}
+
+// Relationships
+relationship ManyToOne {
+  Owner{user} to User with builtInEntity
+  Pet{owner} to Owner
+  Vet{user} to User with builtInEntity
+  Appointment{pet} to Pet
+  Appointment{vet} to Vet
+  AppointmentAssistant{appointment} to Appointment
+  AppointmentAssistant{assistant} to User with builtInEntity
+  AppointmentMessage{appointment} to Appointment
+  AppointmentMessage{sender} to User with builtInEntity
+  AppointmentHistory{appointment} to Appointment
+  AppointmentHistory{user} to User with builtInEntity
+  PasswordResetToken{user} to User with builtInEntity
+}
+
+relationship OneToMany {
+  Owner{pets} to Pet{owner}
+  Pet{appointments} to Appointment{pet}
+  Vet{appointments} to Appointment{vet}
+  Appointment{assistants} to AppointmentAssistant{appointment}
+  Appointment{messages} to AppointmentMessage{appointment}
+  Appointment{history} to AppointmentHistory{appointment}
+}
+
+// Options
+dto Owner, Pet, Vet, Appointment, AppointmentMessage, AppointmentHistory with mapstruct
+dto AppointmentAssistant with mapstruct
+
+service Owner, Pet, Vet, Appointment, AppointmentMessage, AppointmentHistory with serviceClass
+service AppointmentAssistant with serviceClass
+
+paginate Owner, Pet, Vet, Appointment, AppointmentMessage, AppointmentHistory with pagination
+paginate AppointmentAssistant with infinite-scroll

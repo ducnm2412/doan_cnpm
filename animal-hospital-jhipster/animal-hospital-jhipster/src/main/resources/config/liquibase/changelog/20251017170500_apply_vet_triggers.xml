@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="apply-vet-triggers" author="jhipster">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="vet"/>
+            <tableExists tableName="jhi_user"/>
+            <tableExists tableName="jhi_authority"/>
+            <tableExists tableName="jhi_user_authority"/>
+        </preConditions>
+
+        <sqlFile path="config/liquibase/changelog/20251017170000_vet_triggers.sql"
+                 relativeToChangelogFile="false"
+                 endDelimiter="$$"
+                 splitStatements="true"/>
+    </changeSet>
+
+</databaseChangeLog>
+
+
