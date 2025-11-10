@@ -1,0 +1,31 @@
+.main-content::-webkit-scrollbar {
+  display: none;
+}
+.main-content .main-item {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+
+  justify-items: center;   
+  align-items: center; 
+  margin: auto;   
+}
+/*ADD-ITEM*/
+.add-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  transition: 0.2s ease;
+}
+.add-item .add-item-icon{
+  font-size: 100px;
+  border-radius: 50%;
+  border: 2px dashed #ccc;
+  color: #ccc;
+}
+.add-item .add-item-icon:hover {
+  border: 2px dashed #000;
+  color: #000;
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import "../css/components/SidebarPet.css";
+import "../css/SidebarPet.css";
 const SiderbarPet = (props) => {
   const pet = props.petItem;
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ const SiderbarPet = (props) => {
         weight: pet.weight || "",
         allergies: pet.allergies || "",
         notes: pet.notes || "",
-        imageUrl: pet.image || "",
+        imageUrl: pet.imageUrl || "",
       });
     }
   }, [pet]);
@@ -34,13 +34,18 @@ const SiderbarPet = (props) => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+  const handleSubmit = (e) => {
+  e.preventDefault(); // ngăn browser gửi form
+  props.handleSavePet(formData); // gửi dữ liệu lên parent hoặc API
+};
+
   const handleCancel = (e) => {
     e.preventDefault();
-    props.handelCancelPetForm();
+    props.handleCancelPetForm();
   };
   return (
     <div className={`pet-sidebar show`}>
-      <form className="pet-form">
+      <form className="pet-form" onSubmit={handleSubmit}>
         <h3>Thú Cưng Của Bạn</h3>
 
         <label className="pet-form-label">Tên thú cưng*</label>

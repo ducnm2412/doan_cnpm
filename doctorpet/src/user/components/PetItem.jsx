@@ -1,5 +1,5 @@
 import "remixicon/fonts/remixicon.css";
-import "../css/components/PetItem.css";
+import "../css/PetItem.css";
 import { useState } from "react";
 
 const PetItem = (props) => {
@@ -11,6 +11,10 @@ const PetItem = (props) => {
     props.handleShowSidebarPetID(props.id);
     setShowMenu(false);
   };
+  const handleDelete = () => {
+      props.handleDeletePet(props.id);
+      setShowMenu(false);
+  };
   return (
     <div className="pet-item">
       <div className="pet-menu" onClick={handleShowMenu}>
@@ -18,13 +22,13 @@ const PetItem = (props) => {
       </div>
       {showMenu && (
         <div className="pet-option">
-          <button className="pet-delete">Xóa</button>
+          <button className="pet-delete" onClick={handleDelete}>Xóa</button>
           <button className="pet-update" onClick={handleViewOrEdit}>Sửa</button>
           <button className="pet-read" onClick={handleViewOrEdit}>Xem</button>
         </div>
       )}
 
-      <img className="pet-avatar" src={props.image} alt="pet" />
+      <img className="pet-avatar" src={props.imageUrl} alt="pet" />
 
       <div className="pet-info">
         <div className="pet-field">{props.name}</div>

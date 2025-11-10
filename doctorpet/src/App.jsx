@@ -1,13 +1,5 @@
-
 import './App.css'
-import Header from './components/Header'
-import SliderSection from './components/SliderSection'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import AppRouter from './routes/Approuter'
-import UserLayout from './layouts/UserLayout'
-import SiderbarPet from './components/SiderbarPet'
+import UserLayout from './user/layouts/UserLayout'
 function App() {
   return <UserLayout/>
 }
