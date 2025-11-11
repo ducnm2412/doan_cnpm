@@ -1,0 +1,142 @@
+/* Reset & Layout */
+/* * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+} */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+    color: #111454;
+}
+.main-content {
+    margin: 10px;
+}
+
+.content-wrapper {
+    width: 100%;
+    margin: 0px auto;
+}
+/* Page Title */
+.page-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 24px;
+}
+
+/* Appointment Card */
+.appointment-card {
+    padding: 10px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px #f7e5b2;
+    border: 2px solid #f7e5b2;
+    transition: box-shadow 0.4s ease;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.appointment-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Card Header */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border: 10px;
+    border-color: #800303;
+}
+
+.pet-info {
+    display: flex;
+    align-items: start;
+    gap: 12px;
+    width: 70%;
+}
+
+.pet-avatar {
+    width: 36px;
+    height: 36px;
+    background-color: #0a7df0;
+    color: white;
+    font-weight: bold;
+    font-size: 1.125rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pet-name {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #111827;
+    margin: 0;
+}
+
+.pet-vet {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 4px 0 0;
+}
+.appointmentType{
+    border:5px;
+    border-color: #991b1b;
+    background-color: greenyellow;
+    padding: 5px;
+    border-radius: 10px;
+}
+/* Badge (Loại hẹn) */
+.badge {
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 10px;
+}
+
+.badge-emergency { background-color: #ffb9b9; color: #800303; font-size: large;}
+.badge-normal   { background-color: #dbeafe; color: #1e40af; font-size: small;}
+
+/* Info Grid */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    font-size: 0.875rem;
+    color: #4b5563;
+    margin-bottom: 6px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.info-item strong {
+    color: #374151;
+}
+
+/* Icon */
+.icon {
+    font-size: 1rem;
+    color:rgb(38, 8, 190);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-content {
+        padding: 16px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
