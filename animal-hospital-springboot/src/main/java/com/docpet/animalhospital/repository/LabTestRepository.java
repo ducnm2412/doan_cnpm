@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface LabTestRepository extends JpaRepository<LabTest, Long> {
@@ -14,8 +15,8 @@ public interface LabTestRepository extends JpaRepository<LabTest, Long> {
     @EntityGraph(attributePaths = {"appointment", "pet", "requestedBy", "assignedTo"})
     List<LabTest> findAll();
 
-    @EntityGraph(attributePaths = {"appointment", "pet", "requestedBy", "assignedTo"})
-    Optional<LabTest> findOneWithEagerRelationships(Long id);
+    @Query("select labTest from LabTest labTest left join fetch labTest.appointment left join fetch labTest.pet left join fetch labTest.requestedBy left join fetch labTest.assignedTo where labTest.id = :id")
+    Optional<LabTest> findOneWithEagerRelationships(@Param("id") Long id);
 
     @Query("select labTest from LabTest labTest where labTest.appointment.id = ?1")
     @EntityGraph(attributePaths = {"appointment", "pet", "requestedBy", "assignedTo"})

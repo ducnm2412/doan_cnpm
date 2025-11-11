@@ -48,7 +48,7 @@ public class DomainUserDetailsService implements UserDetailsService {
         if (!user.isActivated()) {
             throw new UserNotActivatedException("User " + lowercaseLogin + " was not activated");
         }
-        List<GrantedAuthority> grantedAuthorities = user
+        List<SimpleGrantedAuthority> grantedAuthorities = user
             .getAuthorities()
             .stream()
             .map(authority -> new SimpleGrantedAuthority(authority.getName()))

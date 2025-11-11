@@ -1,7 +1,0 @@
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/animalhospital?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&createDatabaseIfNotExist=true
-    username: root
-    password: ${DB_PASSWORD:}  # Có thể set qua environment variable hoặc thay bằng password thực tế
-    driver-class-name: com.mysql.cj.jdbc.Driver
-

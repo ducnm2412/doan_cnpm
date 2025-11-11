@@ -52,7 +52,7 @@ public class PetResource {
         Owner currentOwner = ownerRepository.findByUser_Login(currentUserLogin)
             .orElseThrow(() -> new BadRequestAlertException("Owner profile not found", ENTITY_NAME, "noowner"));
         
-        petDTO.setOwner(new OwnerDTO(currentOwner));
+        petDTO.setOwnerId(currentOwner.getId());
         
         petDTO = petService.save(petDTO);
         return ResponseEntity.created(new URI("/api/pets/" + petDTO.getId())).body(petDTO);

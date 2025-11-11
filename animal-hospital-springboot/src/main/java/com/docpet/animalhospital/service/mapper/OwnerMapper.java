@@ -8,13 +8,8 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface OwnerMapper extends EntityMapper<OwnerDTO, Owner> {
-    @Mapping(target = "user", source = "user", qualifiedByName = "userId")
+    @Mapping(target = "userId", source = "user.id")
     OwnerDTO toDto(Owner s);
-
-    @Named("userId")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    UserDTO toDtoUserId(User user);
 
     @Mapping(target = "user", ignore = true)
     Owner toEntity(OwnerDTO ownerDTO);

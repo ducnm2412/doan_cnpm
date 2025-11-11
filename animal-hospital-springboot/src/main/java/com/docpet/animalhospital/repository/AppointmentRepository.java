@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -16,8 +17,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @EntityGraph(attributePaths = {"pet", "vet", "owner"})
     List<Appointment> findAll();
 
-    @EntityGraph(attributePaths = {"pet", "vet", "owner"})
-    Optional<Appointment> findOneWithEagerRelationships(Long id);
+    @Query("select appointment from Appointment appointment left join fetch appointment.pet left join fetch appointment.vet left join fetch appointment.owner where appointment.id = :id")
+    Optional<Appointment> findOneWithEagerRelationships(@Param("id") Long id);
 
     @Query("select appointment from Appointment appointment where appointment.owner.user.login = ?#{authentication.name}")
     @EntityGraph(attributePaths = {"pet", "vet", "owner"})

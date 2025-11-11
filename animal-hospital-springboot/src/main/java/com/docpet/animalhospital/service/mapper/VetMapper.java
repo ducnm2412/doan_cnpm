@@ -8,13 +8,8 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface VetMapper extends EntityMapper<VetDTO, Vet> {
-    @Mapping(target = "user", source = "user", qualifiedByName = "userId")
+    @Mapping(target = "userId", source = "user.id")
     VetDTO toDto(Vet s);
-
-    @Named("userId")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    UserDTO toDtoUserId(User user);
 
     @Mapping(target = "user", ignore = true)
     Vet toEntity(VetDTO vetDTO);

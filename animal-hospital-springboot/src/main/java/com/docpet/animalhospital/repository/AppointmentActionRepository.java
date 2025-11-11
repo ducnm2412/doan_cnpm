@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface AppointmentActionRepository extends JpaRepository<AppointmentAction, Long> {
@@ -15,7 +16,8 @@ public interface AppointmentActionRepository extends JpaRepository<AppointmentAc
     List<AppointmentAction> findAll();
 
     @EntityGraph(attributePaths = {"appointment", "assignedTo", "createdBy"})
-    Optional<AppointmentAction> findOneWithEagerRelationships(Long id);
+    @Query("SELECT aa FROM AppointmentAction aa WHERE aa.id = :id")
+    Optional<AppointmentAction> findByIdWithEagerRelationships(@Param("id") Long id);
 
     @Query("select appointmentAction from AppointmentAction appointmentAction where appointmentAction.appointment.id = ?1")
     @EntityGraph(attributePaths = {"appointment", "assignedTo", "createdBy"})
