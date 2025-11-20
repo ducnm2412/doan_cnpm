@@ -17,23 +17,49 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @EntityGraph(attributePaths = {"pet", "vet", "owner"})
     List<Appointment> findAll();
 
-    @Query("select appointment from Appointment appointment left join fetch appointment.pet left join fetch appointment.vet left join fetch appointment.owner where appointment.id = :id")
+    @Query("select appointment from Appointment appointment " +
+           "left join fetch appointment.pet " +
+           "left join fetch appointment.vet " +
+           "left join fetch appointment.vet.user " +
+           "left join fetch appointment.owner " +
+           "where appointment.id = :id")
     Optional<Appointment> findOneWithEagerRelationships(@Param("id") Long id);
 
     @Query("select appointment from Appointment appointment where appointment.owner.user.login = ?#{authentication.name}")
     @EntityGraph(attributePaths = {"pet", "vet", "owner"})
     List<Appointment> findByOwnerIsCurrentUser();
 
-    @Query("select appointment from Appointment appointment where appointment.owner.user.login = ?1")
-    @EntityGraph(attributePaths = {"pet", "vet", "owner"})
+    @Query("select appointment from Appointment appointment " +
+           "left join fetch appointment.pet " +
+           "left join fetch appointment.pet.owner " +
+           "left join fetch appointment.pet.owner.user " +
+           "left join fetch appointment.vet " +
+           "left join fetch appointment.vet.user " +
+           "left join fetch appointment.owner " +
+           "left join fetch appointment.owner.user " +
+           "where appointment.owner.user.login = ?1")
     List<Appointment> findByOwner_User_Login(String login);
 
-    @Query("select appointment from Appointment appointment where appointment.vet.user.login = ?#{authentication.name}")
-    @EntityGraph(attributePaths = {"pet", "vet", "owner"})
+    @Query("select appointment from Appointment appointment " +
+           "left join fetch appointment.pet " +
+           "left join fetch appointment.pet.owner " +
+           "left join fetch appointment.pet.owner.user " +
+           "left join fetch appointment.vet " +
+           "left join fetch appointment.vet.user " +
+           "left join fetch appointment.owner " +
+           "left join fetch appointment.owner.user " +
+           "where appointment.vet.user.login = ?#{authentication.name}")
     List<Appointment> findByVetIsCurrentUser();
 
-    @Query("select appointment from Appointment appointment where appointment.vet.user.login = ?1")
-    @EntityGraph(attributePaths = {"pet", "vet", "owner"})
+    @Query("select appointment from Appointment appointment " +
+           "left join fetch appointment.pet " +
+           "left join fetch appointment.pet.owner " +
+           "left join fetch appointment.pet.owner.user " +
+           "left join fetch appointment.vet " +
+           "left join fetch appointment.vet.user " +
+           "left join fetch appointment.owner " +
+           "left join fetch appointment.owner.user " +
+           "where appointment.vet.user.login = ?1")
     List<Appointment> findByVet_User_Login(String login);
 
     @Query("select appointment from Appointment appointment where appointment.pet.id = ?1")

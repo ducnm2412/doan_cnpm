@@ -16,3 +16,4 @@ ADD COLUMN last_modified_date TIMESTAMP AFTER last_modified_by;
 -- Kiểm tra kết quả
 DESCRIBE jhi_user;
 
+

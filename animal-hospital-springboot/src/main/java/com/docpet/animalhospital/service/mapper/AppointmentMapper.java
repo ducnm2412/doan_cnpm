@@ -10,28 +10,13 @@ import com.docpet.animalhospital.service.dto.PetDTO;
 import com.docpet.animalhospital.service.dto.VetDTO;
 import org.mapstruct.*;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {PetMapper.class, VetMapper.class, OwnerMapper.class})
 public interface AppointmentMapper extends EntityMapper<AppointmentDTO, Appointment> {
 
-    @Mapping(target = "pet", source = "pet", qualifiedByName = "petId")
-    @Mapping(target = "vet", source = "vet", qualifiedByName = "vetId")
-    @Mapping(target = "owner", source = "owner", qualifiedByName = "ownerId")
+    @Mapping(target = "pet", source = "pet")
+    @Mapping(target = "vet", source = "vet")
+    @Mapping(target = "owner", source = "owner")
     AppointmentDTO toDto(Appointment s);
-
-    @Named("petId")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    PetDTO toDtoPetId(Pet pet);
-
-    @Named("vetId")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    VetDTO toDtoVetId(Vet vet);
-
-    @Named("ownerId")
-    @BeanMapping(ignoreByDefault = true)
-    @Mapping(target = "id", source = "id")
-    OwnerDTO toDtoOwnerId(Owner owner);
 
     @Mapping(target = "pet", ignore = true)
     @Mapping(target = "vet", ignore = true)

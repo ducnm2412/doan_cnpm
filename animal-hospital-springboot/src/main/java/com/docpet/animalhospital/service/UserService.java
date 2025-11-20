@@ -1,10 +1,12 @@
 package com.docpet.animalhospital.service;
 
 import com.docpet.animalhospital.config.Constants;
+import com.docpet.animalhospital.domain.Assistant;
 import com.docpet.animalhospital.domain.Authority;
 import com.docpet.animalhospital.domain.Owner;
 import com.docpet.animalhospital.domain.User;
 import com.docpet.animalhospital.domain.Vet;
+import com.docpet.animalhospital.repository.AssistantRepository;
 import com.docpet.animalhospital.repository.AuthorityRepository;
 import com.docpet.animalhospital.repository.OwnerRepository;
 import com.docpet.animalhospital.repository.UserRepository;
@@ -41,19 +43,22 @@ public class UserService {
     private final AuthorityRepository authorityRepository;
     private final OwnerRepository ownerRepository;
     private final VetRepository vetRepository;
+    private final AssistantRepository assistantRepository;
 
     public UserService(
         UserRepository userRepository,
         PasswordEncoder passwordEncoder,
         AuthorityRepository authorityRepository,
         OwnerRepository ownerRepository,
-        VetRepository vetRepository
+        VetRepository vetRepository,
+        AssistantRepository assistantRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authorityRepository = authorityRepository;
         this.ownerRepository = ownerRepository;
         this.vetRepository = vetRepository;
+        this.assistantRepository = assistantRepository;
     }
 
     public Optional<User> activateRegistration(String key) {
@@ -259,7 +264,14 @@ public class UserService {
         newUser.setLastModifiedDate(now);
         // Save - @PrePersist sẽ đảm bảo giá trị không null nếu vẫn còn null
         User savedUser = userRepository.saveAndFlush(newUser);
-        LOG.debug("Created Information for Assistant: {}", savedUser);
+
+        // Tạo Assistant profile
+        Assistant assistant = new Assistant();
+        // Có thể thêm employeeId và department từ AssistantRegistrationVM nếu cần
+        assistant.setUser(savedUser);
+        assistantRepository.save(assistant);
+        LOG.debug("Created Assistant profile for User: {}", savedUser.getLogin());
+
         return savedUser;
     }
 
@@ -290,17 +302,18 @@ public class UserService {
 
     @Transactional
     public void changePassword(String currentClearTextPassword, String newPassword) {
-        SecurityUtils.getCurrentUserLogin()
+        User user = SecurityUtils.getCurrentUserLogin()
             .flatMap(userRepository::findOneByLogin)
-            .ifPresent(user -> {
-                String currentEncryptedPassword = user.getPassword();
-                if (!passwordEncoder.matches(currentClearTextPassword, currentEncryptedPassword)) {
-                    throw new InvalidPasswordException();
-                }
-                String encryptedPassword = passwordEncoder.encode(newPassword);
-                user.setPassword(encryptedPassword);
-                LOG.debug("Changed password for User: {}", user);
-            });
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        String currentEncryptedPassword = user.getPassword();
+        if (!passwordEncoder.matches(currentClearTextPassword, currentEncryptedPassword)) {
+            throw new InvalidPasswordException();
+        }
+        String encryptedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encryptedPassword);
+        userRepository.save(user);
+        LOG.debug("Changed password for User: {}", user);
     }
 
     @Transactional(readOnly = true)

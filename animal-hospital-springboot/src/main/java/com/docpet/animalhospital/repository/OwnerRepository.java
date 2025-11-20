@@ -27,5 +27,8 @@ public interface OwnerRepository extends JpaRepository<Owner, Long> {
     default Optional<Owner> findByUser_Login(String login) {
         return findFirstByUser_Login(login);
     }
+    
+    @Query("select owner from Owner owner left join fetch owner.user where owner.id = ?1")
+    Optional<Owner> findByIdWithUser(Long id);
 }
 

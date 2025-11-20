@@ -1,8 +1,11 @@
 package com.docpet.animalhospital.web.rest;
 
+import com.docpet.animalhospital.domain.Assistant;
 import com.docpet.animalhospital.domain.User;
+import com.docpet.animalhospital.repository.AssistantRepository;
 import com.docpet.animalhospital.repository.UserRepository;
 import com.docpet.animalhospital.security.AuthoritiesConstants;
+import com.docpet.animalhospital.service.AssistantService;
 import com.docpet.animalhospital.service.MailService;
 import com.docpet.animalhospital.service.UserService;
 import com.docpet.animalhospital.service.dto.AdminUserDTO;
@@ -34,11 +37,21 @@ public class VetAssistantController {
 
     private final UserService userService;
     private final UserRepository userRepository;
+    private final AssistantRepository assistantRepository;
+    private final AssistantService assistantService;
     private final MailService mailService;
 
-    public VetAssistantController(UserService userService, UserRepository userRepository, MailService mailService) {
+    public VetAssistantController(
+        UserService userService,
+        UserRepository userRepository,
+        AssistantRepository assistantRepository,
+        AssistantService assistantService,
+        MailService mailService
+    ) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.assistantRepository = assistantRepository;
+        this.assistantService = assistantService;
         this.mailService = mailService;
     }
 
@@ -60,62 +73,85 @@ public class VetAssistantController {
     public ResponseEntity<List<AdminUserDTO>> getAllAssistants() {
         LOG.debug("REST request to get all Assistants for current Vet");
         
-        List<User> assistants = userRepository.findAllByAuthorities_Name(AuthoritiesConstants.ASSISTANT);
+        // Lấy tất cả assistants từ bảng assistant với eager loading user
+        List<Assistant> assistants = assistantRepository.findAllWithUser();
         List<AdminUserDTO> assistantDTOs = assistants.stream()
-            .map(AdminUserDTO::new)
+            .filter(assistant -> assistant.getUser() != null)
+            .map(assistant -> new AdminUserDTO(assistant.getUser()))
             .collect(Collectors.toList());
             
         return ResponseEntity.ok().body(assistantDTOs);
     }
 
-    @GetMapping("/assistants/{login}")
-    public ResponseEntity<AdminUserDTO> getAssistant(@PathVariable String login) {
-        LOG.debug("REST request to get Assistant : {}", login);
+    @GetMapping("/assistants/{id}")
+    public ResponseEntity<AdminUserDTO> getAssistant(@PathVariable Long id) {
+        LOG.debug("REST request to get Assistant : {}", id);
         
-        Optional<User> user = userRepository.findOneByLogin(login);
-        if (user.isPresent() && user.get().getAuthorities().stream()
-            .anyMatch(authority -> authority.getName().equals(AuthoritiesConstants.ASSISTANT))) {
-            return ResponseEntity.ok().body(new AdminUserDTO(user.get()));
+        Optional<Assistant> assistant = assistantRepository.findByIdWithUser(id);
+        if (assistant.isPresent() && assistant.get().getUser() != null) {
+            return ResponseEntity.ok().body(new AdminUserDTO(assistant.get().getUser()));
         }
         
         return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/assistants/{login}")
-    public ResponseEntity<AdminUserDTO> updateAssistant(@PathVariable String login, @Valid @RequestBody AdminUserDTO userDTO) {
-        LOG.debug("REST request to update Assistant : {}", login);
+    @PutMapping("/assistants/{id}")
+    public ResponseEntity<AdminUserDTO> updateAssistant(@PathVariable Long id, @Valid @RequestBody AdminUserDTO userDTO) {
+        LOG.debug("REST request to update Assistant : {}", id);
         
-        Optional<User> existingUser = userRepository.findOneByLogin(login);
-        if (existingUser.isPresent() && existingUser.get().getAuthorities().stream()
-            .anyMatch(authority -> authority.getName().equals(AuthoritiesConstants.ASSISTANT))) {
-            
-            userService.updateUser(
-                userDTO.getFirstName(),
-                userDTO.getLastName(),
-                userDTO.getEmail(),
-                userDTO.getLangKey(),
-                userDTO.getImageUrl()
-            );
-            
-            return ResponseEntity.ok().body(new AdminUserDTO(existingUser.get()));
+        Assistant assistant = assistantRepository.findByIdWithUser(id)
+            .orElseThrow(() -> new BadRequestAlertException("Assistant not found", ENTITY_NAME, "notfound"));
+        
+        if (assistant.getUser() == null) {
+            throw new BadRequestAlertException("Assistant does not have a user", ENTITY_NAME, "nouser");
         }
         
-        return ResponseEntity.notFound().build();
+        // Update user của assistant
+        User user = assistant.getUser();
+        if (userDTO.getFirstName() != null) {
+            user.setFirstName(userDTO.getFirstName());
+        }
+        if (userDTO.getLastName() != null) {
+            user.setLastName(userDTO.getLastName());
+        }
+        if (userDTO.getEmail() != null) {
+            user.setEmail(userDTO.getEmail().toLowerCase());
+        }
+        if (userDTO.getLangKey() != null) {
+            user.setLangKey(userDTO.getLangKey());
+        }
+        if (userDTO.getImageUrl() != null) {
+            user.setImageUrl(userDTO.getImageUrl());
+        }
+        
+        User updatedUser = userRepository.save(user);
+        
+        return ResponseEntity.ok().body(new AdminUserDTO(updatedUser));
     }
 
-    @DeleteMapping("/assistants/{login}")
-    public ResponseEntity<Void> deleteAssistant(@PathVariable String login) {
-        LOG.debug("REST request to delete Assistant : {}", login);
+    @DeleteMapping("/assistants/{id}")
+    public ResponseEntity<Void> deleteAssistant(@PathVariable Long id) {
+        LOG.debug("REST request to delete Assistant : {}", id);
         
-        Optional<User> user = userRepository.findOneByLogin(login);
-        if (user.isPresent() && user.get().getAuthorities().stream()
-            .anyMatch(authority -> authority.getName().equals(AuthoritiesConstants.ASSISTANT))) {
-            
-            userService.deleteUser(login);
-            return ResponseEntity.noContent().build();
+        Assistant assistant = assistantRepository.findByIdWithUser(id)
+            .orElseThrow(() -> new BadRequestAlertException("Assistant not found", ENTITY_NAME, "notfound"));
+        
+        // Lưu lại thông tin user trước khi xóa assistant
+        String userLogin = null;
+        if (assistant.getUser() != null) {
+            userLogin = assistant.getUser().getLogin();
         }
         
-        return ResponseEntity.notFound().build();
+        // Xóa Assistant trước để tránh lỗi TransientObjectException
+        assistantRepository.delete(assistant);
+        assistantRepository.flush(); // Đảm bảo xóa assistant trước
+        
+        // Sau đó mới xóa User (nếu có)
+        if (userLogin != null) {
+            userService.deleteUser(userLogin);
+        }
+        
+        return ResponseEntity.noContent().build();
     }
 
     private static boolean isPasswordLengthInvalid(String password) {

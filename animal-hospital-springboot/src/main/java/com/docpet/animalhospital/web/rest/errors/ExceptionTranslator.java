@@ -1,5 +1,8 @@
 package com.docpet.animalhospital.web.rest.errors;
 
+import com.docpet.animalhospital.service.EmailAlreadyUsedException;
+import com.docpet.animalhospital.service.InvalidPasswordException;
+import com.docpet.animalhospital.service.UsernameAlreadyUsedException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +25,36 @@ public class ExceptionTranslator {
     @ExceptionHandler
     public ResponseEntity<Map<String, Object>> handleBadRequestAlertException(BadRequestAlertException ex) {
         return createBadRequestResponse(ex);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, Object>> handleInvalidPasswordException(InvalidPasswordException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Incorrect password");
+        log.warn("Invalid password attempt: {}", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, Object>> handleUsernameAlreadyUsedException(UsernameAlreadyUsedException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Username already used");
+        log.warn("Username already used: {}", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, Object>> handleEmailAlreadyUsedException(EmailAlreadyUsedException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", ex.getMessage());
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("error", "Email already used");
+        log.warn("Email already used: {}", ex.getMessage());
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler

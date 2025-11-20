@@ -1,6 +1,11 @@
 package com.docpet.animalhospital.web.rest;
 
+import com.docpet.animalhospital.domain.AppointmentAssistant;
+import com.docpet.animalhospital.domain.Assistant;
+import com.docpet.animalhospital.repository.AppointmentAssistantRepository;
 import com.docpet.animalhospital.repository.AppointmentRepository;
+import com.docpet.animalhospital.repository.AssistantRepository;
+import com.docpet.animalhospital.repository.OwnerRepository;
 import com.docpet.animalhospital.repository.UserRepository;
 import com.docpet.animalhospital.security.AuthoritiesConstants;
 import com.docpet.animalhospital.security.SecurityUtils;
@@ -14,6 +19,7 @@ import com.docpet.animalhospital.web.rest.errors.BadRequestAlertException;
 import com.docpet.animalhospital.web.rest.vm.SendMessageVM;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -38,20 +44,29 @@ public class AppointmentResource {
     private final AppointmentRepository appointmentRepository;
     private final AppointmentActionService appointmentActionService;
     private final AppointmentMessageService appointmentMessageService;
+    private final AppointmentAssistantRepository appointmentAssistantRepository;
     private final UserRepository userRepository;
+    private final OwnerRepository ownerRepository;
+    private final AssistantRepository assistantRepository;
 
     public AppointmentResource(
         AppointmentService appointmentService,
         AppointmentRepository appointmentRepository,
         AppointmentActionService appointmentActionService,
         AppointmentMessageService appointmentMessageService,
-        UserRepository userRepository
+        AppointmentAssistantRepository appointmentAssistantRepository,
+        UserRepository userRepository,
+        OwnerRepository ownerRepository,
+        AssistantRepository assistantRepository
     ) {
         this.appointmentService = appointmentService;
         this.appointmentRepository = appointmentRepository;
         this.appointmentActionService = appointmentActionService;
         this.appointmentMessageService = appointmentMessageService;
+        this.appointmentAssistantRepository = appointmentAssistantRepository;
         this.userRepository = userRepository;
+        this.ownerRepository = ownerRepository;
+        this.assistantRepository = assistantRepository;
     }
 
     @PostMapping("")
@@ -121,7 +136,44 @@ public class AppointmentResource {
         String currentUserLogin = SecurityUtils.getCurrentUserLogin()
             .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
         
-        List<AppointmentDTO> appointments = appointmentService.findAllForCurrentOwner(currentUserLogin);
+        List<AppointmentDTO> appointments;
+        
+        // Kiểm tra xem user là owner hay vet
+        boolean isOwner = ownerRepository.findByUser_Login(currentUserLogin).isPresent();
+        boolean isVet = SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.DOCTOR);
+        
+        if (isOwner && isVet) {
+            // User có cả owner và vet profile - trả về appointments của cả hai
+            List<AppointmentDTO> ownerAppointments = appointmentService.findAllForCurrentOwner(currentUserLogin);
+            List<AppointmentDTO> vetAppointments = appointmentService.findAllForCurrentVet(currentUserLogin);
+            
+            // Merge và loại bỏ duplicate
+            java.util.Set<Long> appointmentIds = new java.util.HashSet<>();
+            List<AppointmentDTO> allAppointments = new java.util.ArrayList<>();
+            
+            for (AppointmentDTO apt : ownerAppointments) {
+                if (appointmentIds.add(apt.getId())) {
+                    allAppointments.add(apt);
+                }
+            }
+            for (AppointmentDTO apt : vetAppointments) {
+                if (appointmentIds.add(apt.getId())) {
+                    allAppointments.add(apt);
+                }
+            }
+            
+            appointments = allAppointments;
+        } else if (isOwner) {
+            // User là owner
+            appointments = appointmentService.findAllForCurrentOwner(currentUserLogin);
+        } else if (isVet) {
+            // User là vet
+            appointments = appointmentService.findAllForCurrentVet(currentUserLogin);
+        } else {
+            // User không phải owner cũng không phải vet
+            appointments = java.util.Collections.emptyList();
+        }
+        
         return ResponseEntity.ok().body(appointments);
     }
 
@@ -159,20 +211,6 @@ public class AppointmentResource {
         return ResponseEntity.ok().body(appointments);
     }
 
-    @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('" + AuthoritiesConstants.DOCTOR + "')")
-    public ResponseEntity<AppointmentDTO> updateAppointmentStatus(
-        @PathVariable("id") Long id,
-        @RequestBody String status
-    ) {
-        LOG.debug("REST request to update appointment status: {} for appointment: {}", status, id);
-        String currentUserLogin = SecurityUtils.getCurrentUserLogin()
-            .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
-        
-        AppointmentDTO appointmentDTO = appointmentService.updateAppointmentStatus(id, status, currentUserLogin);
-        return ResponseEntity.ok().body(appointmentDTO);
-    }
-
     @GetMapping("/regular")
     public ResponseEntity<List<AppointmentDTO>> getRegularAppointmentsByDateAndVetId(
         @RequestParam("date") String date,
@@ -191,27 +229,23 @@ public class AppointmentResource {
         return ResponseEntity.ok().body(appointments);
     }
 
-    @GetMapping("/vet/available")
-    public ResponseEntity<Boolean> checkVetAvailability(
-        @RequestParam("vetId") Long vetId,
-        @RequestParam("startTime") String startTimeString,
-        @RequestParam(value = "endTime", required = false) String endTimeString) {
-        LOG.debug("REST request to check availability for vet: {} at startTime: {}", vetId, startTimeString);
+    @PostMapping("/vet/available")
+    public ResponseEntity<Boolean> checkVetAvailability(@Valid @RequestBody CheckAvailabilityRequest request) {
+        LOG.debug("REST request to check availability for vet: {} at startTime: {}", request.getVetId(), request.getStartTime());
         
-        try {
-            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ISO_ZONED_DATE_TIME;
-            java.time.ZonedDateTime startTime = java.time.ZonedDateTime.parse(startTimeString, formatter);
-            java.time.ZonedDateTime endTime = null;
-            
-            if (endTimeString != null && !endTimeString.trim().isEmpty()) {
-                endTime = java.time.ZonedDateTime.parse(endTimeString, formatter);
-            }
-            
-            boolean isAvailable = appointmentService.checkVetAvailability(vetId, startTime, endTime);
-            return ResponseEntity.ok().body(isAvailable);
-        } catch (java.time.format.DateTimeParseException e) {
-            throw new BadRequestAlertException("Invalid date format. Expected ISO 8601 format (e.g., 2024-01-20T10:00:00+07:00)", ENTITY_NAME, "invaliddate");
+        // Nếu không có endTime, tự động tính từ startTime + 60 phút
+        java.time.ZonedDateTime endTime = request.getEndTime();
+        if (endTime == null) {
+            endTime = request.getStartTime().plusHours(1);
+            LOG.debug("Auto-calculated endTime: {} (startTime + 60 minutes)", endTime);
         }
+        
+        boolean isAvailable = appointmentService.checkVetAvailability(
+            request.getVetId(), 
+            request.getStartTime(), 
+            endTime
+        );
+        return ResponseEntity.ok().body(isAvailable);
     }
 
     @GetMapping("/assistant/assigned")
@@ -223,16 +257,34 @@ public class AppointmentResource {
         String currentUserLogin = SecurityUtils.getCurrentUserLogin()
             .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
 
-        Long currentUserId = userRepository.findOneByLogin(currentUserLogin)
-            .map(user -> user.getId())
-            .orElseThrow(() -> new BadRequestAlertException("User not found", ENTITY_NAME, "usernotfound"));
+        // Lấy assistant theo user login của user đang đăng nhập
+        Assistant assistant = assistantRepository.findByUser_Login(currentUserLogin)
+            .orElseThrow(() -> new BadRequestAlertException("Assistant not found", ENTITY_NAME, "assistantnotfound"));
+        
+        // Lấy appointments đã được phân công từ bảng appointment_assistant
+        // Query theo assistant_id của user đang đăng nhập
+        Long currentAssistantId = assistant.getId();
+        LOG.debug("Querying appointments for assistant_id: {}", currentAssistantId);
+        List<AppointmentAssistant> appointmentAssistants = appointmentAssistantRepository
+            .findByAssistantIdWithRelations(currentAssistantId);
 
-        List<AppointmentActionDTO> actions;
-        if (status != null && !status.trim().isEmpty()) {
-            actions = appointmentActionService.findByAssignedToIdAndStatus(currentUserId, status);
-        } else {
-            actions = appointmentActionService.findByAssignedToId(currentUserId);
-        }
+        // Convert sang AppointmentActionDTO và filter theo status nếu có
+        List<AppointmentActionDTO> actions = appointmentAssistants.stream()
+            .map(aa -> {
+                // Tìm appointment_action tương ứng với appointment này và assistant này
+                Long appointmentId = aa.getAppointment().getId();
+                Long assistantUserId = assistant.getUser() != null ? assistant.getUser().getId() : null;
+                
+                // Lấy appointment_action với action_type = ASSIGN_ASSISTANT
+                return appointmentActionService.findByAppointmentId(appointmentId).stream()
+                    .filter(action -> "ASSIGN_ASSISTANT".equals(action.getActionType()) &&
+                        (assistantUserId == null || assistantUserId.equals(action.getAssignedToId())))
+                    .findFirst()
+                    .orElse(null);
+            })
+            .filter(action -> action != null)
+            .filter(action -> status == null || status.trim().isEmpty() || status.equals(action.getStatus()))
+            .toList();
 
         return ResponseEntity.ok().body(actions);
     }
@@ -241,19 +293,40 @@ public class AppointmentResource {
     @PreAuthorize("hasAuthority('" + AuthoritiesConstants.ASSISTANT + "')")
     public ResponseEntity<List<AppointmentActionDTO>> getMyPendingAssignments() {
         LOG.debug("REST request to get pending assigned appointments for current assistant");
+        // Sử dụng lại logic của getMyAssignedAppointments với status = PENDING
+        return getMyAssignedAppointments("PENDING");
+    }
+
+    @GetMapping("/assistant/{id}/detail")
+    @PreAuthorize("hasAuthority('" + AuthoritiesConstants.ASSISTANT + "')")
+    public ResponseEntity<AppointmentDTO> getAssignedAppointmentDetail(@PathVariable("id") Long id) {
+        LOG.debug("REST request to get appointment detail for assistant: {}", id);
         String currentUserLogin = SecurityUtils.getCurrentUserLogin()
             .orElseThrow(() -> new BadRequestAlertException("User not authenticated", ENTITY_NAME, "noauth"));
 
-        Long currentUserId = userRepository.findOneByLogin(currentUserLogin)
-            .map(user -> user.getId())
-            .orElseThrow(() -> new BadRequestAlertException("User not found", ENTITY_NAME, "usernotfound"));
+        // Lấy assistant theo user login của user đang đăng nhập
+        Assistant assistant = assistantRepository.findByUser_Login(currentUserLogin)
+            .orElseThrow(() -> new BadRequestAlertException("Assistant not found", ENTITY_NAME, "assistantnotfound"));
 
-        List<AppointmentActionDTO> actions = appointmentActionService.findByAssignedToIdAndStatus(
-            currentUserId,
-            "PENDING"
-        );
+        // Kiểm tra appointment đã được phân công cho assistant này
+        Optional<AppointmentAssistant> appointmentAssistant = appointmentAssistantRepository
+            .findByAppointmentIdAndAssistantId(id, assistant.getId());
 
-        return ResponseEntity.ok().body(actions);
+        if (appointmentAssistant.isEmpty()) {
+            throw new BadRequestAlertException(
+                "Appointment not assigned to you or not found", 
+                ENTITY_NAME, 
+                "notassigned"
+            );
+        }
+
+        // Lấy chi tiết appointment
+        Optional<AppointmentDTO> appointmentDTO = appointmentService.findOne(id);
+        if (appointmentDTO.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok().body(appointmentDTO.get());
     }
 
     @PostMapping("/{id}/messages")
@@ -281,6 +354,43 @@ public class AppointmentResource {
         
         List<AppointmentMessageDTO> messages = appointmentMessageService.findByAppointmentId(appointmentId, currentUserLogin);
         return ResponseEntity.ok().body(messages);
+    }
+
+    // Request DTOs
+    public static class CheckAvailabilityRequest implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
+        @NotNull
+        private Long vetId;
+        
+        @NotNull
+        private java.time.ZonedDateTime startTime;
+        
+        private java.time.ZonedDateTime endTime;
+
+        public Long getVetId() {
+            return vetId;
+        }
+
+        public void setVetId(Long vetId) {
+            this.vetId = vetId;
+        }
+
+        public java.time.ZonedDateTime getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(java.time.ZonedDateTime startTime) {
+            this.startTime = startTime;
+        }
+
+        public java.time.ZonedDateTime getEndTime() {
+            return endTime;
+        }
+
+        public void setEndTime(java.time.ZonedDateTime endTime) {
+            this.endTime = endTime;
+        }
     }
 }
 

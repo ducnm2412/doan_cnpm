@@ -8,6 +8,8 @@ import com.docpet.animalhospital.repository.AppointmentRepository;
 import com.docpet.animalhospital.repository.OwnerRepository;
 import com.docpet.animalhospital.repository.PetRepository;
 import com.docpet.animalhospital.repository.VetRepository;
+import com.docpet.animalhospital.security.AuthoritiesConstants;
+import com.docpet.animalhospital.security.SecurityUtils;
 import com.docpet.animalhospital.service.dto.AppointmentDTO;
 import com.docpet.animalhospital.service.mapper.AppointmentMapper;
 import com.docpet.animalhospital.web.rest.errors.BadRequestAlertException;
@@ -97,18 +99,32 @@ public class AppointmentService {
     public AppointmentDTO createAppointment(AppointmentDTO appointmentDTO, String currentUserLogin) {
         LOG.debug("Request to create Appointment for user: {}", currentUserLogin);
 
-        Owner currentOwner = ownerRepository.findByUser_Login(currentUserLogin)
-            .orElseThrow(() -> new BadRequestAlertException("Owner profile not found", "appointment", "noowner"));
-
         if (appointmentDTO.getPet() == null || appointmentDTO.getPet().getId() == null) {
             throw new BadRequestAlertException("Pet is required", "appointment", "petrequired");
         }
 
-        Pet pet = petRepository.findById(appointmentDTO.getPet().getId())
+        // Load pet cùng với owner để tránh lazy loading issues
+        Pet pet = petRepository.findByIdWithOwner(appointmentDTO.getPet().getId())
             .orElseThrow(() -> new BadRequestAlertException("Pet not found", "appointment", "petnotfound"));
 
-        if (!pet.getOwner().getId().equals(currentOwner.getId())) {
-            throw new BadRequestAlertException("Pet does not belong to current owner", "appointment", "petnotowned");
+        // Kiểm tra pet có owner không
+        if (pet.getOwner() == null) {
+            throw new BadRequestAlertException("Pet does not have an owner assigned", "appointment", "petnoowner");
+        }
+
+        // Xác định owner cho appointment
+        Owner appointmentOwner;
+        
+        // Kiểm tra xem current user có phải là owner của pet không
+        Optional<Owner> currentUserOwnerOpt = ownerRepository.findByUser_Login(currentUserLogin);
+        if (currentUserOwnerOpt.isPresent() && currentUserOwnerOpt.get().getId().equals(pet.getOwner().getId())) {
+            // Current user là owner của pet
+            appointmentOwner = currentUserOwnerOpt.get();
+            LOG.debug("Current user is the owner of the pet");
+        } else {
+            // Current user không phải owner (có thể là vet) - sử dụng owner của pet
+            appointmentOwner = pet.getOwner();
+            LOG.debug("Current user is not the owner, using pet's owner: {}", appointmentOwner.getId());
         }
 
         if (appointmentDTO.getVet() == null || appointmentDTO.getVet().getId() == null) {
@@ -157,14 +173,22 @@ public class AppointmentService {
             appointmentDTO.setTimeEnd(timeEnd);
         }
 
-        appointmentDTO.setOwner(new com.docpet.animalhospital.service.dto.OwnerDTO(currentOwner));
+        appointmentDTO.setOwner(new com.docpet.animalhospital.service.dto.OwnerDTO(appointmentOwner));
         appointmentDTO.setStatus("PENDING");
 
         Appointment appointment = appointmentMapper.toEntity(appointmentDTO);
+        // Set các quan hệ vì mapper ignore chúng
+        appointment.setPet(pet);
+        appointment.setVet(vet);
+        appointment.setOwner(appointmentOwner);
+        
         appointment = appointmentRepository.save(appointment);
         
-        LOG.debug("Created Appointment: {}", appointment);
-        return appointmentMapper.toDto(appointment);
+        Appointment savedAppointment = appointmentRepository.findOneWithEagerRelationships(appointment.getId())
+            .orElse(appointment);
+        
+        LOG.debug("Created Appointment: {}", savedAppointment);
+        return appointmentMapper.toDto(savedAppointment);
     }
 
     @Transactional(readOnly = true)
@@ -199,11 +223,20 @@ public class AppointmentService {
         Pet pet = petRepository.findById(petId)
             .orElseThrow(() -> new BadRequestAlertException("Pet not found", "appointment", "petnotfound"));
 
-        Owner currentOwner = ownerRepository.findByUser_Login(currentUserLogin)
-            .orElseThrow(() -> new BadRequestAlertException("Owner profile not found", "appointment", "noowner"));
+        // Kiểm tra xem user có phải là Vet (có role DOCTOR) không
+        boolean isVet = SecurityUtils.hasCurrentUserThisAuthority(AuthoritiesConstants.DOCTOR);
+        
+        if (isVet) {
+            // Vet có thể xem lịch sử appointment của bất kỳ Pet nào
+            LOG.debug("User {} is a Vet, allowing access to pet history", currentUserLogin);
+        } else {
+            // Owner chỉ có thể xem lịch sử appointment của Pet thuộc về mình
+            Owner currentOwner = ownerRepository.findByUser_Login(currentUserLogin)
+                .orElseThrow(() -> new BadRequestAlertException("Owner profile not found", "appointment", "noowner"));
 
-        if (!pet.getOwner().getId().equals(currentOwner.getId())) {
-            throw new BadRequestAlertException("Pet does not belong to current owner", "appointment", "petnotowned");
+            if (!pet.getOwner().getId().equals(currentOwner.getId())) {
+                throw new BadRequestAlertException("Pet does not belong to current owner", "appointment", "petnotowned");
+            }
         }
 
         List<Appointment> appointments = appointmentRepository.findByPet_Id(petId);

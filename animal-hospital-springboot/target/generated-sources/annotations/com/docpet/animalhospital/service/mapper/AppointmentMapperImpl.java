@@ -1,25 +1,27 @@
 package com.docpet.animalhospital.service.mapper;
 
 import com.docpet.animalhospital.domain.Appointment;
-import com.docpet.animalhospital.domain.Owner;
-import com.docpet.animalhospital.domain.Pet;
-import com.docpet.animalhospital.domain.Vet;
 import com.docpet.animalhospital.service.dto.AppointmentDTO;
-import com.docpet.animalhospital.service.dto.OwnerDTO;
-import com.docpet.animalhospital.service.dto.PetDTO;
-import com.docpet.animalhospital.service.dto.VetDTO;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.processing.Generated;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-20T10:11:37+0700",
-    comments = "version: 1.6.3, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
+    date = "2025-11-20T12:16:51+0700",
+    comments = "version: 1.6.3, compiler: javac, environment: Java 23.0.2 (Eclipse Adoptium)"
 )
 @Component
 public class AppointmentMapperImpl implements AppointmentMapper {
+
+    @Autowired
+    private PetMapper petMapper;
+    @Autowired
+    private VetMapper vetMapper;
+    @Autowired
+    private OwnerMapper ownerMapper;
 
     @Override
     public List<Appointment> toEntity(List<AppointmentDTO> dtoList) {
@@ -57,9 +59,9 @@ public class AppointmentMapperImpl implements AppointmentMapper {
 
         AppointmentDTO appointmentDTO = new AppointmentDTO();
 
-        appointmentDTO.setPet( toDtoPetId( s.getPet() ) );
-        appointmentDTO.setVet( toDtoVetId( s.getVet() ) );
-        appointmentDTO.setOwner( toDtoOwnerId( s.getOwner() ) );
+        appointmentDTO.setPet( petMapper.toDto( s.getPet() ) );
+        appointmentDTO.setVet( vetMapper.toDto( s.getVet() ) );
+        appointmentDTO.setOwner( ownerMapper.toDto( s.getOwner() ) );
         appointmentDTO.setId( s.getId() );
         appointmentDTO.setTimeStart( s.getTimeStart() );
         appointmentDTO.setTimeEnd( s.getTimeEnd() );
@@ -70,45 +72,6 @@ public class AppointmentMapperImpl implements AppointmentMapper {
         appointmentDTO.setLocationType( s.getLocationType() );
 
         return appointmentDTO;
-    }
-
-    @Override
-    public PetDTO toDtoPetId(Pet pet) {
-        if ( pet == null ) {
-            return null;
-        }
-
-        PetDTO petDTO = new PetDTO();
-
-        petDTO.setId( pet.getId() );
-
-        return petDTO;
-    }
-
-    @Override
-    public VetDTO toDtoVetId(Vet vet) {
-        if ( vet == null ) {
-            return null;
-        }
-
-        VetDTO vetDTO = new VetDTO();
-
-        vetDTO.setId( vet.getId() );
-
-        return vetDTO;
-    }
-
-    @Override
-    public OwnerDTO toDtoOwnerId(Owner owner) {
-        if ( owner == null ) {
-            return null;
-        }
-
-        OwnerDTO ownerDTO = new OwnerDTO();
-
-        ownerDTO.setId( owner.getId() );
-
-        return ownerDTO;
     }
 
     @Override

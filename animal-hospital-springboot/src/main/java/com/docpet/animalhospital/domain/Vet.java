@@ -5,7 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "vet")
+@Table(name = "vet", uniqueConstraints = {
+    @UniqueConstraint(columnNames = "user_id")
+})
 public class Vet implements Serializable {
 
     private static final long serialVersionUID = 1L;

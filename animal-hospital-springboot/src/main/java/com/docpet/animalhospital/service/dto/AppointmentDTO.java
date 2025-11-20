@@ -1,5 +1,6 @@
 package com.docpet.animalhospital.service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -12,6 +13,7 @@ public class AppointmentDTO implements Serializable {
     @NotNull
     private ZonedDateTime timeStart;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private ZonedDateTime timeEnd;
 
     @NotNull

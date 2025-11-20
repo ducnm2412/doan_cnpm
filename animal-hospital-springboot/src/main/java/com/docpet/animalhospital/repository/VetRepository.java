@@ -13,6 +13,19 @@ public interface VetRepository extends JpaRepository<Vet, Long> {
     List<Vet> findByUserIsCurrentUser();
     
     @Query("select vet from Vet vet where vet.user.login = ?1")
-    Optional<Vet> findByUser_Login(String login);
+    List<Vet> findAllByUser_Login(String login);
+    
+    @Query("select vet from Vet vet where vet.user.login = ?1 order by vet.id asc")
+    java.util.List<Vet> findVetsByUser_Login(String login);
+    
+    default Optional<Vet> findFirstByUser_Login(String login) {
+        java.util.List<Vet> vets = findVetsByUser_Login(login);
+        return vets.isEmpty() ? Optional.empty() : Optional.of(vets.get(0));
+    }
+    
+    // Alias method để tương thích với code hiện tại
+    default Optional<Vet> findByUser_Login(String login) {
+        return findFirstByUser_Login(login);
+    }
 }
 

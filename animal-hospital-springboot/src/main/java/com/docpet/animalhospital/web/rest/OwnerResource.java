@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -66,7 +65,6 @@ public class OwnerResource {
     }
 
     @PatchMapping(value = "/{id}", consumes = { "application/json", "application/merge-patch+json" })
-    @PreAuthorize("#id == authentication.principal.id")
     public ResponseEntity<OwnerDTO> partialUpdateOwner(
         @PathVariable(value = "id", required = false) final Long id,
         @NotNull @RequestBody OwnerDTO ownerDTO

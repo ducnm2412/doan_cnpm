@@ -20,3 +20,4 @@ public interface AppointmentMessageRepository extends JpaRepository<AppointmentM
     List<AppointmentMessage> findByAppointmentIdOrderByTimestampDesc(@Param("appointmentId") Long appointmentId);
 }
 
+

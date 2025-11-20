@@ -91,7 +91,8 @@ CREATE TABLE IF NOT EXISTS vet (
     license_no VARCHAR(255) NOT NULL,
     specialization VARCHAR(255),
     user_id BIGINT,
-    CONSTRAINT fk_vet__user_id FOREIGN KEY (user_id) REFERENCES jhi_user(id) ON DELETE SET NULL
+    CONSTRAINT fk_vet__user_id FOREIGN KEY (user_id) REFERENCES jhi_user(id) ON DELETE SET NULL,
+    CONSTRAINT uk_vet_user_id UNIQUE (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -192,7 +193,7 @@ CREATE TABLE IF NOT EXISTS appointment_assistant (
     appointment_id BIGINT NOT NULL,
     assistant_id BIGINT NOT NULL,
     CONSTRAINT fk_assistant_appointment FOREIGN KEY (appointment_id) REFERENCES appointment(id) ON DELETE CASCADE,
-    CONSTRAINT fk_assistant_user FOREIGN KEY (assistant_id) REFERENCES jhi_user(id) ON DELETE CASCADE,
+    CONSTRAINT fk_assistant_assistant_id FOREIGN KEY (assistant_id) REFERENCES assistant(id) ON DELETE CASCADE,
     CONSTRAINT uk_assistant_appointment_user UNIQUE (appointment_id, assistant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
