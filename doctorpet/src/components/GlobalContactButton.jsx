@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import ContactButton from "./ContactButton";
 import ChatBox from "../message/ChatBox";
 import Swal from "sweetalert2";
 import "remixicon/fonts/remixicon.css";
 
 const GlobalContactButton = () => {
+  const location = useLocation();
+
+  // Ẩn chatbot trên các trang: bác sĩ, login, đăng ký
+  const hiddenPaths = ["/vet", "/login", "/register", "/register-vet"];
+  if (hiddenPaths.some((path) => location.pathname.startsWith(path))) {
+    return null;
+  }
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState(null);

@@ -52,7 +52,9 @@ const AddSup = (props) => {
 
     if (res.ok) {
       Swal.fire({
-        title: props.assistant ? "Cập nhật thành công!" : "Thêm trợ lý thành công!",
+        title: props.assistant
+          ? "Cập nhật thành công!"
+          : "Thêm trợ lý thành công!",
         icon: "success",
       });
       props.onCreated?.();
@@ -67,7 +69,6 @@ const AddSup = (props) => {
         <h2>Thêm Trợ Lý</h2>
 
         <form onSubmit={handleSubmit} className="sup-form">
-
           <div className="name-row">
             <input
               type="text"

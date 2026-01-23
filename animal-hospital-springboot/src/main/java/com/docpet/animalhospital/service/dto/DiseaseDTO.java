@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.time.Instant;
 
 /**
- * DTO chung cho DiseaseDog và DiseaseCat
+ * DTO chung cho tất cả các loài động vật (Chó, Mèo, Chuột, Chim, Cá, Rùa, Rắn, Khỉ, Heo, Dê, Cừu, Trâu, Bò)
  */
 public class DiseaseDTO implements Serializable {
 
@@ -19,7 +19,7 @@ public class DiseaseDTO implements Serializable {
     private Boolean isActive;
     private Instant createdDate;
     private Instant lastModifiedDate;
-    private String species; // "Chó" hoặc "Mèo"
+    private String species; // Tên loài: "Chó", "Mèo", "Chuột", "Chim", "Cá", "Rùa", "Rắn", "Khỉ", "Heo", "Dê", "Cừu", "Trâu", "Bò"
 
     public DiseaseDTO() {}
 

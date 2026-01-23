@@ -63,16 +63,26 @@ public class ChatService {
                 }
             }
             
-            LOG.info("Detected species: {}", species);
+            LOG.info("Detected species: {} (from message: '{}')", species, message);
+            if (species == null) {
+                LOG.warn("Could not detect species from message: '{}'", message);
+            }
 
             // 3. Kiểm tra xem có phải câu hỏi về thú y không
             boolean isVeterinaryQuestion = isVeterinaryRelatedQuestion(message);
             
-            // 4. Nếu có species và là câu hỏi về bệnh/triệu chứng, search disease
+            // 4. Nếu là câu hỏi về bệnh/triệu chứng, search disease
+            // Sử dụng thuật toán Multi-stage Sequential Matching mới
+            // Thuật toán này sẽ tự động detect species và tìm disease keywords sau vị trí species
             List<DiseaseDTO> diseaseList = List.of();
-            if (species != null && isVeterinaryQuestion) {
-                LOG.info("Searching disease for message: '{}', species: {}", message, species);
-                diseaseList = diseaseSearchService.searchDisease(message, species);
+            if (isVeterinaryQuestion) {
+                LOG.info("Using Multi-stage Sequential Matching for message: '{}'", message);
+                diseaseList = diseaseSearchService.searchDiseaseSequential(message);
+                
+                // Update species từ thuật toán mới (nếu có)
+                if (diseaseList.isEmpty()) {
+                    LOG.warn("Sequential matching found no results for message: '{}'", message);
+                }
             }
             
             LOG.info("Found {} disease results from database", diseaseList.size());
@@ -119,28 +129,148 @@ public class ChatService {
     }
 
     /**
-     * Detect species (chó/mèo) từ message
+     * Detect species từ message
+     * Normalize tiếng Việt để nhận diện tốt hơn
      */
     private String detectSpecies(String message) {
         if (message == null || message.isEmpty()) {
+            LOG.debug("detectSpecies: message is null or empty");
             return null;
         }
 
         String lowerMessage = message.toLowerCase();
+        String normalizedMessage = normalizeVietnamese(lowerMessage);
+        LOG.debug("detectSpecies: original='{}', lower='{}', normalized='{}'", message, lowerMessage, normalizedMessage);
         
-        // Check for "chó" or "dog"
-        if (lowerMessage.contains("chó") || lowerMessage.contains("dog") || 
-            lowerMessage.contains("cún") || lowerMessage.contains("cẩu")) {
+        // Check for "chó" or "dog" - check cả có dấu và không dấu
+        if (lowerMessage.contains("chó") || lowerMessage.contains("cho") || 
+            normalizedMessage.contains("cho") ||
+            lowerMessage.contains("dog") || 
+            lowerMessage.contains("cún") || lowerMessage.contains("cun") ||
+            normalizedMessage.contains("cun") ||
+            lowerMessage.contains("cẩu") || lowerMessage.contains("cau") ||
+            normalizedMessage.contains("cau")) {
             return "Chó";
         }
         
-        // Check for "mèo" or "cat"
-        if (lowerMessage.contains("mèo") || lowerMessage.contains("cat") || 
-            lowerMessage.contains("mèo con") || lowerMessage.contains("kitten")) {
+        // Check for "mèo" or "cat" - check cả có dấu và không dấu
+        if (lowerMessage.contains("mèo") || lowerMessage.contains("meo") ||
+            normalizedMessage.contains("meo") ||
+            lowerMessage.contains("cat") || 
+            lowerMessage.contains("mèo con") || lowerMessage.contains("meo con") ||
+            normalizedMessage.contains("meo con") ||
+            lowerMessage.contains("kitten")) {
             return "Mèo";
         }
 
+        // Check for "chim" or "bird" - check cả có dấu và không dấu
+        if (lowerMessage.contains("chim") || 
+            normalizedMessage.contains("chim") ||
+            lowerMessage.contains("bird")) {
+            return "Chim";
+        }
+
+        // Check for "rùa" or "turtle"
+        if (lowerMessage.contains("rùa") || lowerMessage.contains("rua") ||
+            normalizedMessage.contains("rua") ||
+            lowerMessage.contains("turtle") || lowerMessage.contains("tortoise")) {
+            return "Rùa";
+        }
+
+        // Check for "rắn" or "snake"
+        if (lowerMessage.contains("rắn") || lowerMessage.contains("ran") ||
+            normalizedMessage.contains("ran") ||
+            lowerMessage.contains("snake")) {
+            return "Rắn";
+        }
+
+        // Check for "lợn" or "pig"
+        if (lowerMessage.contains("lợn") || lowerMessage.contains("lon") ||
+            normalizedMessage.contains("lon") ||
+            lowerMessage.contains("heo") || lowerMessage.contains("pig")) {
+            return "Lợn";
+        }
+
+        // Check for "dê" or "goat"
+        if (lowerMessage.contains("dê") || lowerMessage.contains("de") ||
+            normalizedMessage.contains("de") ||
+            lowerMessage.contains("goat")) {
+            return "Dê";
+        }
+
+        // Check for "cừu" or "sheep"
+        if (lowerMessage.contains("cừu") || lowerMessage.contains("cuu") ||
+            normalizedMessage.contains("cuu") ||
+            lowerMessage.contains("sheep")) {
+            return "Cừu";
+        }
+
+        // Check for "bò" or "cow"
+        if (lowerMessage.contains("bò") || lowerMessage.contains("bo") ||
+            normalizedMessage.contains("bo") ||
+            lowerMessage.contains("cow")) {
+            return "Bò";
+        }
+
+        // Check for "trâu" or "buffalo"
+        if (lowerMessage.contains("trâu") || lowerMessage.contains("trau") ||
+            normalizedMessage.contains("trau") ||
+            lowerMessage.contains("buffalo")) {
+            return "Trâu";
+        }
+
+        // Check for "khỉ" or "monkey"
+        if (lowerMessage.contains("khỉ") || lowerMessage.contains("khi") ||
+            normalizedMessage.contains("khi") ||
+            lowerMessage.contains("monkey")) {
+            return "Khỉ";
+        }
+
+        // Check for "cá" or "fish"
+        if (lowerMessage.contains("cá") || lowerMessage.contains("ca") ||
+            normalizedMessage.contains("ca") ||
+            lowerMessage.contains("fish")) {
+            return "Cá";
+        }
+
+        // Check for "chuột" or "mouse"
+        if (lowerMessage.contains("chuột") || lowerMessage.contains("chuot") ||
+            normalizedMessage.contains("chuot") ||
+            lowerMessage.contains("mouse") || lowerMessage.contains("rat")) {
+            return "Chuột";
+        }
+
+        // Check for "thỏ" or "rabbit" - check cả có dấu và không dấu
+        if (lowerMessage.contains("thỏ") || lowerMessage.contains("tho") ||
+            normalizedMessage.contains("tho") ||
+            lowerMessage.contains("rabbit")) {
+            return "Thỏ";
+        }
+
         return null; // Không detect được
+    }
+
+    /**
+     * Normalize tiếng Việt - loại bỏ dấu để so sánh tốt hơn
+     */
+    private String normalizeVietnamese(String text) {
+        if (text == null) return "";
+        
+        return text
+            .replaceAll("[àáạảãâầấậẩẫăằắặẳẵ]", "a")
+            .replaceAll("[èéẹẻẽêềếệểễ]", "e")
+            .replaceAll("[ìíịỉĩ]", "i")
+            .replaceAll("[òóọỏõôồốộổỗơờớợởỡ]", "o")
+            .replaceAll("[ùúụủũưừứựửữ]", "u")
+            .replaceAll("[ỳýỵỷỹ]", "y")
+            .replaceAll("[đ]", "d")
+            .replaceAll("[ÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴ]", "A")
+            .replaceAll("[ÈÉẸẺẼÊỀẾỆỂỄ]", "E")
+            .replaceAll("[ÌÍỊỈĨ]", "I")
+            .replaceAll("[ÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠ]", "O")
+            .replaceAll("[ÙÚỤỦŨƯỪỨỰỬỮ]", "U")
+            .replaceAll("[ỲÝỴỶỸ]", "Y")
+            .replaceAll("[Đ]", "D");
     }
 
     /**
@@ -152,11 +282,8 @@ public class ChatService {
         // Chào hỏi
         if (lowerMessage.matches(".*(xin chào|chào|hello|hi|hey|chào bạn|chào bot).*")) {
             return "Xin chào! 👋 Rất vui được gặp bạn! 😊\n\n" +
-                   "Tôi là bác sĩ thú y AI, tôi có thể giúp bạn:\n" +
-                   "🐕 Tư vấn về sức khỏe chó\n" +
-                   "🐈 Tư vấn về sức khỏe mèo\n" +
-                   "💬 Trả lời các câu hỏi về thú y\n\n" +
-                   "Bạn có thể hỏi tôi bất cứ điều gì về thú cưng của bạn nhé!";
+                   "Tôi là bác sĩ thú y AI, tôi có thể giúp bạn tư vấn về sức khỏe các loài động vật như chó, mèo, chim, rùa, rắn và nhiều loài khác.\n\n" +
+                   "Bạn có thể hỏi tôi bất cứ điều gì về thú cưng của bạn nhé! 💬";
         }
         
         // Cảm ơn
@@ -177,7 +304,7 @@ public class ChatService {
         if (lowerMessage.matches(".*(bạn tên gì|tên của bạn|who are you|bạn là ai).*")) {
             return "Tôi là bác sĩ thú y AI! 😊\n\n" +
                    "Tôi được tạo ra để giúp bạn tư vấn về sức khỏe thú cưng. " +
-                   "Bạn có thể hỏi tôi về bất kỳ vấn đề nào liên quan đến chó và mèo nhé! 🐾";
+                   "Bạn có thể hỏi tôi về bất kỳ vấn đề nào liên quan đến các loài động vật như chó, mèo, chim, rùa, rắn, lợn, dê, cừu, bò, trâu, khỉ, cá, chuột và nhiều loài khác nhé! 🐾";
         }
         
         return null; // Không phải câu chào hỏi thông thường
@@ -196,13 +323,23 @@ public class ChatService {
         // Các từ khóa về thú y
         String[] veterinaryKeywords = {
             "chó", "mèo", "dog", "cat", "cún", "cẩu", "kitten",
+            "chim", "bird", "rùa", "rua", "turtle", "rắn", "ran", "snake",
+            "lợn", "lon", "heo", "pig", "dê", "de", "goat",
+            "cừu", "cuu", "sheep", "bò", "bo", "cow",
+            "trâu", "trau", "buffalo", "khỉ", "khi", "monkey",
+            "cá", "ca", "fish", "chuột", "chuot", "mouse", "rat",
+            "thỏ", "tho", "rabbit",
             "thú cưng", "pet", "thú y", "veterinary",
             "bệnh", "triệu chứng", "symptom", "disease", "illness",
             "nôn", "tiêu chảy", "diarrhea", "vomit", "ốm", "sick",
             "chăm sóc", "care", "dinh dưỡng", "nutrition", "thức ăn", "food",
             "tiêm phòng", "vaccine", "vaccination", "sức khỏe", "health",
             "điều trị", "treatment", "thuốc", "medicine", "khám", "examination",
-            "tư vấn", "advice", "hỏi", "question", "giúp", "help"
+            "tư vấn", "advice", "hỏi", "question", "giúp", "help",
+            "đau", "pain", "mắt", "eye", "mũi", "nose", "tai", "ear",
+            "co giật", "động kinh", "convulsion", "seizure", "mệt mỏi", "lờ đờ",
+            "sụt cân", "weight loss", "rụng lông", "feather loss", "ngứa", "itchy",
+            "gãi", "scratch", "da đỏ", "red skin", "viêm da", "dermatitis"
         };
         
         // Kiểm tra xem có từ khóa nào trong message không
